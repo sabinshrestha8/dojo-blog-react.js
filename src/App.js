@@ -1,4 +1,3 @@
-import './App.css';
 // step 1: importing Navbar & Home component 
 import Navbar from './Navbar';
 import Home from './Home';
