@@ -12,6 +12,7 @@ const Home = () => {
         <div className="home">
             {/* step 1: passing data in the BlogList Component as a prop */}
             <BlogList blogs={ blogs } title="All Blogs" />
+            <BlogList blogs={ blogs.filter((blog) => blog.author === 'mario') } title="Mario's blogs" />
         </div>
      );
 }
