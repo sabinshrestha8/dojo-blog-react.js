@@ -20,7 +20,7 @@ const Home = () => {
     useEffect(() => {
         console.log('use effect ran');
         console.log(blogs);
-    });
+    }, []);  // An empty dependency array makes sure that useEffect() hook runs only on first render
 
     return ( 
         <div className="home">
