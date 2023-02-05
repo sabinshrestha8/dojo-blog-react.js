@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BlogList from "./BlogList";
 
 const Home = () => {
@@ -12,6 +12,15 @@ const Home = () => {
         const newBlogs = blogs.filter(blog => blog.id !== id);
         setBlogs(newBlogs);
     }
+
+    /* have to be careful while changing state inside use effect hook 
+        i.e. could end up in continuous loop */
+
+    // use effect hook fires on every render
+    useEffect(() => {
+        console.log('use effect ran');
+        console.log(blogs);
+    });
 
     return ( 
         <div className="home">
