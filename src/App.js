@@ -1,17 +1,25 @@
-// step 1: importing Navbar & Home component 
 import Navbar from './Navbar';
 import Home from './Home';
+// importing required components from react-router package
+/* BrowserRouter component is used as the root component for the routing configuration, and
+Route component is used to define individual routes. The Switch component is used to ensure
+that only one route is rendered at a time, rather than multiple routes being rendered simultaneously */
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 function App() {
   return (
-    <div className="App">
-      {/* step 2: injecting Navbar component inside root component */}
-      <Navbar />
-      <div className="content">
-        {/* step 2: nesting Home component inside root component */}
-        <Home />
+    <Router>
+      <div className="App">
+        <Navbar />
+        <div className="content">
+          <Switch>
+            <Route path="/">
+              <Home />
+            </Route>
+          </Switch>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 }
 
