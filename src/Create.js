@@ -1,4 +1,8 @@
 import { useState } from "react";
+// import useHistory hook from react-router package
+import { useHistory } from "react-router-dom"; // DEPRECATED
+// It is now
+//import { useNavigate } from "react-router-dom"; // As at March 3, 2022
 
 const Create = () => {
     const [title, setTitle] = useState('');
@@ -6,28 +10,32 @@ const Create = () => {
     const [author, setAuthor] = useState('mario');
     const [isPending, setIsPending] = useState(false);
 
+    /* The useHistory() hook returns the 
+    history object used by React Router */
+    const history = useHistory();
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const blog = { title, body, author };
 
         setIsPending(true);
 
-        setTimeout(() => {
-            fetch('http://localhost:8000/blogs', {
-                method: 'Post',
-                // content type that is being sent
-                headers: { "content-Type": "application/json" },
-                /* To convert an object data into json string,
-                we 've to use json object then we use a method
-                called stringify() and pass in the object we
-                want to turn into a json string */
-                body: JSON.stringify(blog)
-            })
-            .then(() => {
-                console.log('new blog added');
-                setIsPending(false);
-            })
-        }, 500);
+        fetch('http://localhost:8000/blogs', {
+            method: 'Post',
+            // content type that is being sent
+            headers: { "content-Type": "application/json" },
+            /* To convert an object data into json string,
+            we 've to use json object then we use a method
+            called stringify() and pass in the object we
+            want to turn into a json string */
+            body: JSON.stringify(blog)
+        })
+        .then(() => {
+            console.log('new blog added');
+            setIsPending(false);
+            // history.go(-1);
+            history.push('/');
+        })
     }
 
     return (
