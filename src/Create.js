@@ -4,12 +4,30 @@ const Create = () => {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [author, setAuthor] = useState('mario');
+    const [isPending, setIsPending] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const blog = { title, body, author }; 
+        const blog = { title, body, author };
 
-        console.log(blog);
+        setIsPending(true);
+
+        setTimeout(() => {
+            fetch('http://localhost:8000/blogs', {
+                method: 'Post',
+                // content type that is being sent
+                headers: { "content-Type": "application/json" },
+                /* To convert an object data into json string,
+                we 've to use json object then we use a method
+                called stringify() and pass in the object we
+                want to turn into a json string */
+                body: JSON.stringify(blog)
+            })
+            .then(() => {
+                console.log('new blog added');
+                setIsPending(false);
+            })
+        }, 500);
     }
 
     return (
@@ -41,10 +59,8 @@ const Create = () => {
                     <option value="mario">mario</option>
                     <option value="yoshi">yoshi</option>
                 </select>
-                <button>Add Blog</button>
-                <p>{ title }</p>
-                <p>{ body }</p>
-                <p>{ author }</p>
+                { !isPending && <button>Add Blog</button>}
+                { isPending && <button disabled>Adding blog...</button>}
             </form>
         </div>
     );
