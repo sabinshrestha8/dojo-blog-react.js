@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import useFetch from "./useFetch";
 
 const BlogDetails = () => {
@@ -8,6 +8,17 @@ const BlogDetails = () => {
     /* To call data property with other specific name
     use ':' and the 'name' you want to call it */
     const { data: blog, isPending, error } = useFetch('http://localhost:8000/blogs/' + id);
+    const history = useHistory();
+
+    /* An “options object” is a programming pattern that you can
+    use to pass any number of named arguments to a function */
+    const handleClick = () => {
+        fetch('http://localhost:8000/blogs/' + id, {
+            method: 'DELETE'
+        }).then(() => {
+            history.push('/');
+        })
+    }
 
     return (
         <div className="blog-details">
@@ -18,6 +29,7 @@ const BlogDetails = () => {
                     <h2>{ blog.title }</h2>
                     <p>Written by { blog.author }</p>
                     <div>{ blog.body }</div>
+                    <button onClick={ handleClick }>delete</button>
                 </article>
             )}
 
