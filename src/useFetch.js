@@ -43,7 +43,7 @@ const useFetch = (url) => {
         // return () => console.log('cleanup');
         return () => abortController.abort();
 
-    }, [url]);
+    }, [url]);  // passing url as dependency that means whenever url changes its gonna re-run this function to get the data for that endpoint
 
     return { data, isPending, error };
 }
