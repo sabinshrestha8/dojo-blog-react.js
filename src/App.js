@@ -1,12 +1,18 @@
-import Navbar from './Navbar';
-import Home from './Home';
+import Navbar from "./Navbar";
+import Home from "./Home";
 // importing required components from react-router package
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Create from './Create';
-import BlogDetails from './BlogDetails';
-import NotFound from './NotFound';
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Create from "./Create";
+import BlogDetails from "./BlogDetails";
+import NotFound from "./NotFound";
+import { useState } from "react";
 
 function App() {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [author, setAuthor] = useState("mario");
+  const [isPending, setIsPending] = useState(false);
+
   return (
     <Router>
       <div className="App">
@@ -17,7 +23,32 @@ function App() {
               <Home />
             </Route>
             <Route path="/create">
-              <Create />
+              <Create
+                blog={{
+                  title,
+                  body,
+                  author,
+                  isPending,
+                  setIsPending,
+                  setTitle,
+                  setBody,
+                  setAuthor,
+                }}
+              />
+            </Route>
+            <Route path="/blogs/update/:id">
+              <Create
+                blog={{
+                  title,
+                  body,
+                  author,
+                  isPending,
+                  setIsPending,
+                  setTitle,
+                  setBody,
+                  setAuthor,
+                }}
+              />
             </Route>
             <Route path="/blogs/:id">
               <BlogDetails />

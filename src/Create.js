@@ -1,77 +1,95 @@
-import { useState } from "react";
-// import useHistory hook from react-router package
-import { useHistory } from "react-router-dom"; // DEPRECATED
-// It is now
-//import { useNavigate } from "react-router-dom"; // As at March 3, 2022
+import { useHistory, useParams } from "react-router-dom";
+import useFetch from "./useFetch";
+import { useEffect } from "react";
 
-const Create = () => {
-    const [title, setTitle] = useState('');
-    const [body, setBody] = useState('');
-    const [author, setAuthor] = useState('mario');
-    const [isPending, setIsPending] = useState(false);
+const Create = ({ blog }) => {
+  const {
+    title,
+    body,
+    author,
+    isPending,
+    setIsPending,
+    setTitle,
+    setBody,
+    setAuthor,
+  } = blog;
 
-    /* The useHistory() hook returns the 
-    history object used by React Router */
-    const history = useHistory();
+  const history = useHistory();
+  const { id } = useParams();
+  const { data } = useFetch(id ? "http://localhost:8000/blogs/" + id : null);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const blog = { title, body, author };
-
-        setIsPending(true);
-
-        fetch('http://localhost:8000/blogs', {
-            method: 'Post',
-            // content type that is being sent
-            headers: { "content-Type": "application/json" },
-            /* To convert an object data into json string,
-            we 've to use json object then we use a method
-            called stringify() and pass in the object we
-            want to turn into a json string */
-            body: JSON.stringify(blog)
-        })
-        .then(() => {
-            console.log('new blog added');
-            setIsPending(false);
-            // history.go(-1);
-            history.push('/');
-        })
+  useEffect(() => {
+    if (id && data) {
+      setTitle(data.title || "");
+      setBody(data.body || "");
+      setAuthor(data.author || "mario");
+    } else {
+      // Clear form fields when id is not present (Add Blog)
+      setTitle("");
+      setBody("");
+      setAuthor("mario");
     }
+  }, [data, id, setTitle, setBody, setAuthor]);
 
-    return (
-        <div className="create">
-            <h2>Add a New Blog</h2>
-            <form onSubmit={ handleSubmit }>
-                <label>Blog title:</label>
-                <input
-                    type="text"
-                    required
-                    value={ title }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                    /* To change the value of input we 've to use onChange event
-                    and inside the event we should define anonymous function
-                    which then updates the state of that input field */
-                    onChange={ (e) => setTitle(e.target.value) }
-                />
-                <label>Blog body:</label>
-                <textarea
-                    required
-                    value={ body }
-                    onChange={ (e) => setBody(e.target.value) }
-                ></textarea>
-                <label>Blog author:</label>
-                <select 
-                    value={ author }
-                    onChange={ (e) => setAuthor(e.target.value) }
-                >
-                    <option value="mario">mario</option>
-                    <option value="yoshi">yoshi</option>
-                </select>
-                { !isPending && <button>Add Blog</button>}
-                { isPending && <button disabled>Adding blog...</button>}
-            </form>
-        </div>
-    );
-}
- 
+    const newBlog = { title, body, author };
+
+    try {
+      setIsPending(true);
+
+      const response = await fetch(
+        `http://localhost:8000/blogs${id ? "/" + id : ""}`,
+        {
+          method: id ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newBlog),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to " + (id ? "update" : "add") + " blog");
+      }
+
+      console.log(id ? "Blog updated" : "New blog added");
+      setIsPending(false);
+      history.push("/");
+    } catch (error) {
+      console.error(error);
+      setIsPending(false);
+    }
+  };
+
+  return (
+    <div className="create">
+      <h2>{id ? "Edit Blog" : "Add a New Blog"}</h2>
+      <form onSubmit={handleSubmit}>
+        <label>Blog title:</label>
+        <input
+          type="text"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <label>Blog body:</label>
+        <textarea
+          required
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        ></textarea>
+        <label>Blog author:</label>
+        <select value={author} onChange={(e) => setAuthor(e.target.value)}>
+          <option value="mario">mario</option>
+          <option value="yoshi">yoshi</option>
+        </select>
+        {!isPending && <button>{id ? "Update Blog" : "Add Blog"}</button>}
+        {isPending && (
+          <button disabled>{id ? "Updating blog..." : "Adding blog..."}</button>
+        )}
+      </form>
+    </div>
+  );
+};
+
 export default Create;
