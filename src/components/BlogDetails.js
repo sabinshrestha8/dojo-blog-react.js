@@ -1,5 +1,5 @@
 import { useHistory, useParams } from "react-router-dom";
-import useFetch from "./useFetch";
+import useFetch from "../hooks/useFetch";
 
 const BlogDetails = () => {
   /* To grab route parameters from the route or url, we have to use import useParams hook */

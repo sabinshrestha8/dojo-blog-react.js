@@ -1,10 +1,10 @@
-import Navbar from "./Navbar";
-import Home from "./Home";
+import Navbar from "./components/Navbar";
+import Home from "./components/Home";
 // importing required components from react-router package
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Create from "./Create";
-import BlogDetails from "./BlogDetails";
-import NotFound from "./NotFound";
+import Create from "./components/Create";
+import BlogDetails from "./components/BlogDetails";
+import NotFound from "./components/NotFound";
 import { useState } from "react";
 
 function App() {
