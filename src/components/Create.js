@@ -1,8 +1,9 @@
 import { useHistory, useParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import BlogContext from "../context/blogs/blogContext";
 
-const Create = ({ blog }) => {
+const Create = () => {
   const {
     title,
     body,
@@ -12,7 +13,7 @@ const Create = ({ blog }) => {
     setTitle,
     setBody,
     setAuthor,
-  } = blog;
+  } = useContext(BlogContext);
 
   const history = useHistory();
   const { id } = useParams();
