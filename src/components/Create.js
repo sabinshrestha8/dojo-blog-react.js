@@ -2,40 +2,42 @@ import { useHistory, useParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { useContext, useEffect } from "react";
 import BlogContext from "../context/blogs/blogContext";
+import { useForm } from "react-hook-form";
 
 const Create = () => {
   const {
-    title,
-    body,
-    author,
-    isPending,
-    setIsPending,
-    setTitle,
-    setBody,
-    setAuthor,
-  } = useContext(BlogContext);
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
-  const history = useHistory();
   const { id } = useParams();
-  const { data } = useFetch(id ? "http://localhost:8000/blogs/" + id : null);
+  const history = useHistory();
+  const { isPending, setIsPending } = useContext(BlogContext);
+
+  const {
+    data,
+    isPending: isLoading,
+    error,
+  } = useFetch(id ? "http://localhost:8000/blogs/" + id : null);
 
   useEffect(() => {
     if (id && data) {
-      setTitle(data.title || "");
-      setBody(data.body || "");
-      setAuthor(data.author || "mario");
+      // Update/populate form fields with the fetched data
+      setValue("title", data.title || "");
+      setValue("body", data.body || "");
+      setValue("author", data.author || "mario");
     } else {
-      // Clear form fields when id is not present (Add Blog)
-      setTitle("");
-      setBody("");
-      setAuthor("mario");
+      // Clear form fields in useForm
+      setValue("title", "");
+      setValue("body", "");
+      setValue("author", "mario");
     }
-  }, [data, id, setTitle, setBody, setAuthor]);
+  }, [data, id, setValue]);
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (newBlog, e) => {
     e.preventDefault();
-
-    const newBlog = { title, body, author };
 
     try {
       setIsPending(true);
@@ -57,33 +59,37 @@ const Create = () => {
       setIsPending(false);
       history.push("/");
     } catch (error) {
-      console.error(error);
+      console.error("Error:", error.message);
       setIsPending(false);
     }
   };
 
+  if (isLoading) return <div>Loading...</div>;
+
+  if (id && error) return <div>{error}</div>;
+
   return (
     <div className="create">
       <h2>{id ? "Edit Blog" : "Add a New Blog"}</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <label>Blog title:</label>
         <input
           type="text"
-          required
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          // bind the register function of the useForm hook to the title input field
+          {...register("title", { required: "Title is required" })}
         />
+        <p style={{ color: "red" }}>{errors.title?.message}</p>
         <label>Blog body:</label>
         <textarea
-          required
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
+          {...register("body", { required: "Body is required" })}
         ></textarea>
+        <p style={{ color: "red" }}>{errors.body?.message}</p>
         <label>Blog author:</label>
-        <select value={author} onChange={(e) => setAuthor(e.target.value)}>
+        <select {...register("author", { required: "Author is required" })}>
           <option value="mario">mario</option>
           <option value="yoshi">yoshi</option>
         </select>
+        <p style={{ color: "red" }}>{errors.author?.message}</p>
         {!isPending && <button>{id ? "Update Blog" : "Add Blog"}</button>}
         {isPending && (
           <button disabled>{id ? "Updating blog..." : "Adding blog..."}</button>
