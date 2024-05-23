@@ -7,13 +7,15 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 const Create = () => {
-  console.log(Yup.object());
-
   // Define the validation schema using Yup
   const validationSchema = Yup.object().shape({
-    title: Yup.string().required("Title is required."),
+    title: Yup.string()
+      .required("Title is required.")
+      .min(4, "Title must be at least 4 characters"),
     body: Yup.string().required("Body is required."),
-    author: Yup.string().required("Author is required."),
+    author: Yup.string()
+      .required("Author is required.")
+      .min(4, "Author must be at least 4 characters"),
   });
 
   const {
@@ -23,6 +25,7 @@ const Create = () => {
     formState: { errors },
   } = useForm({
     // Integrate the Yup schema with React Hook Form
+    // resolver is just where we specify how our schema will look like
     resolver: yupResolver(validationSchema),
   });
 
