@@ -3,14 +3,28 @@ import useFetch from "../hooks/useFetch";
 import { useContext, useEffect } from "react";
 import BlogContext from "../context/blogs/blogContext";
 import { useForm } from "react-hook-form";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 const Create = () => {
+  console.log(Yup.object());
+
+  // Define the validation schema using Yup
+  const validationSchema = Yup.object().shape({
+    title: Yup.string().required("Title is required."),
+    body: Yup.string().required("Body is required."),
+    author: Yup.string().required("Author is required."),
+  });
+
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    // Integrate the Yup schema with React Hook Form
+    resolver: yupResolver(validationSchema),
+  });
 
   const { id } = useParams();
   const history = useHistory();
@@ -76,20 +90,18 @@ const Create = () => {
         <input
           type="text"
           // bind the register function of the useForm hook to the title input field
-          {...register("title", { required: "Title is required" })}
+          {...register("title")}
         />
-        <p style={{ color: "red" }}>{errors.title?.message}</p>
+        <p className="error-message">{errors.title?.message}</p>
         <label>Blog body:</label>
-        <textarea
-          {...register("body", { required: "Body is required" })}
-        ></textarea>
-        <p style={{ color: "red" }}>{errors.body?.message}</p>
+        <textarea {...register("body")}></textarea>
+        <p className="error-message">{errors.body?.message}</p>
         <label>Blog author:</label>
-        <select {...register("author", { required: "Author is required" })}>
+        <select {...register("author")}>
           <option value="mario">mario</option>
           <option value="yoshi">yoshi</option>
         </select>
-        <p style={{ color: "red" }}>{errors.author?.message}</p>
+        <p className="error-message">{errors.author?.message}</p>
         {!isPending && <button>{id ? "Update Blog" : "Add Blog"}</button>}
         {isPending && (
           <button disabled>{id ? "Updating blog..." : "Adding blog..."}</button>

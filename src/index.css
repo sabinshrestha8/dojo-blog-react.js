@@ -131,3 +131,10 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+.error-message {
+  color: #e71d59;
+  text-align: left;
+  margin-left: 0;
+  padding-bottom: 0.4rem;
+}
