@@ -1,14 +1,20 @@
 import BlogList from "./BlogList";
-import useFetch from "../hooks/useFetch";
+import { useQuery } from "@tanstack/react-query";
 
 const Home = () => {
+  const getBlogs = () => {
+    return fetch("http://localhost:8000/blogs").then((res) => res.json());
+  };
+
   // grab the data but call it blogs in this context
   const {
     data: blogs,
     isPending,
     error,
-  } = useFetch("http://localhost:8000/blogs");
-  // const { data, isPending, error } = useFetch('http://localhost:8000/blogs');
+  } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: getBlogs,
+  });
 
   return (
     <div className="home">
