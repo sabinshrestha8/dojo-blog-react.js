@@ -1,10 +1,9 @@
 import { useHistory, useParams } from "react-router-dom";
-import useFetch from "../hooks/useFetch";
-import { useContext, useEffect } from "react";
-import BlogContext from "../context/blogs/blogContext";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Create = () => {
   // Define the validation schema using Yup
@@ -31,13 +30,21 @@ const Create = () => {
 
   const { id } = useParams();
   const history = useHistory();
-  const { isPending, setIsPending } = useContext(BlogContext);
+  const queryClient = useQueryClient();
 
-  const {
-    data,
-    isPending: isLoading,
-    error,
-  } = useFetch(id ? "http://localhost:8000/blogs/" + id : null);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["blog", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const response = await fetch(`http://localhost:8000/blogs/${id}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch blog");
+      }
+
+      return response.json();
+    },
+  });
 
   useEffect(() => {
     if (id && data) {
@@ -53,14 +60,10 @@ const Create = () => {
     }
   }, [data, id, setValue]);
 
-  const onSubmit = async (newBlog, e) => {
-    e.preventDefault();
-
-    try {
-      setIsPending(true);
-
-      const response = await fetch(
-        `http://localhost:8000/blogs${id ? "/" + id : ""}`,
+  const { mutate, isLoading: isMutating } = useMutation({
+    mutationFn: async (newBlog) => {
+      const res = await fetch(
+        `http://localhost:8000/blog${id ? "/" + id : ""}`,
         {
           method: id ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -68,17 +71,24 @@ const Create = () => {
         }
       );
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to " + (id ? "update" : "add") + " blog");
       }
 
-      console.log(id ? "Blog updated" : "New blog added");
-      setIsPending(false);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["blog"]);
       history.push("/");
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Error:", error.message);
-      setIsPending(false);
-    }
+    },
+  });
+
+  const onSubmit = (newBlog, e) => {
+    e.preventDefault();
+    mutate(newBlog);
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -90,11 +100,7 @@ const Create = () => {
       <h2>{id ? "Edit Blog" : "Add a New Blog"}</h2>
       <form onSubmit={handleSubmit(onSubmit)}>
         <label>Blog title:</label>
-        <input
-          type="text"
-          // bind the register function of the useForm hook to the title input field
-          {...register("title")}
-        />
+        <input type="text" {...register("title")} />
         <p className="error-message">{errors.title?.message}</p>
         <label>Blog body:</label>
         <textarea {...register("body")}></textarea>
@@ -105,8 +111,8 @@ const Create = () => {
           <option value="yoshi">yoshi</option>
         </select>
         <p className="error-message">{errors.author?.message}</p>
-        {!isPending && <button>{id ? "Update Blog" : "Add Blog"}</button>}
-        {isPending && (
+        {!isMutating && <button>{id ? "Update Blog" : "Add Blog"}</button>}
+        {isMutating && (
           <button disabled>{id ? "Updating blog..." : "Adding blog..."}</button>
         )}
       </form>
